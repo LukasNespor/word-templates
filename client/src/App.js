@@ -9,10 +9,12 @@ import { PrimaryButton } from "office-ui-fabric-react";
 import { initializeIcons } from "office-ui-fabric-react/lib/Icons";
 initializeIcons();
 
-const funcAppUrl = "https://lne-templates.azurewebsites.net";
-const uploadTemplateUrl = `${funcAppUrl}/UploadTemplate`;
-const listTemplatesUrl = `${funcAppUrl}/GetTemplates`;
-const generateDocUrl = `${funcAppUrl}/GenerateDocument`;
+const funcAppUrl = "http://localhost:7071/api";
+const code = "";
+const getSASUrl = `${funcAppUrl}/GetSAS?${code}`;
+const processTemplateUrl = `${funcAppUrl}/ProcessTemplate?${code}`;
+const listTemplatesUrl = `${funcAppUrl}/GetTemplates?${code}`;
+const generateDocUrl = `${funcAppUrl}/GenerateDocument?${code}`;
 
 class App extends Component {
   constructor() {
@@ -39,7 +41,8 @@ class App extends Component {
             <PrimaryButton text="Přidat šablonu" onClick={this.showUpload} />
             {!this.state.dialogHidden &&
               <Upload
-                url={uploadTemplateUrl}
+                url={processTemplateUrl}
+                getSASUrl={getSASUrl}
                 hidden={this.state.dialogHidden}
                 onUploaded={this.onUploaded}
                 onDismissed={this.onDissmissedUpload}

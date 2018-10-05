@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import {
   Dialog, DialogType, DialogFooter, TextField, PrimaryButton, DefaultButton, Spinner, SpinnerSize
 } from "office-ui-fabric-react";
-// import axios, { post } from "axios";
+import axios from "axios";
 
 export class Upload extends Component {
   constructor(props) {
@@ -18,8 +18,7 @@ export class Upload extends Component {
     this.onSubmit = this.onSubmit.bind(this)
     this.onNameChange = this.onNameChange.bind(this);
     this.onDescriptionChange = this.onDescriptionChange.bind(this);
-    this.onChange = this.onChange.bind(this)
-    this.fileUpload = this.fileUpload.bind(this)
+    this.onFileChange = this.onFileChange.bind(this)
   }
 
   render() {
@@ -49,7 +48,7 @@ export class Upload extends Component {
         </div>
 
         <div className="fieldContainer">
-          <input type="file" onChange={this.onChange} />
+          <input type="file" onChange={this.onFileChange} accept="application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
         </div>
 
         <DialogFooter>
@@ -66,14 +65,32 @@ export class Upload extends Component {
 
   onSubmit() {
     this.setState({ processing: true });
-    this.fileUpload(this.state.file).then(response => {
-      this.setState({
-        templateName: "",
-        processing: false
-      });
+    axios.get(this.props.getSASUrl).then(sasResponse => {
+      const { file } = this.state;
+      /* global AzureStorage */
+      const service = AzureStorage.Blob.createBlobServiceWithSas(sasResponse.data.host, sasResponse.data.token);
+      const customBlockSize = file.size > 1024 * 1024 * 32 ? 1024 * 1024 * 4 : 1024 * 512;
+      service.singleBlobPutThresholdInBytes = customBlockSize;
+      service.createBlockBlobFromBrowserFile("templates", file.name, file, { blockSize: customBlockSize }, (error, result) => {
+        if (!error) {
+          const data = {
+            name: this.state.name,
+            description: this.state.description,
+            blobName: result.name
+          };
 
-      this.props.onUploaded(response);
-    })
+          axios.post(this.props.url, data).then(processed => {
+            this.setState({
+              name: "",
+              description: "",
+              processing: false
+            });
+
+            this.props.onUploaded(processed.data);
+          });
+        }
+      });
+    });
   }
 
   onNameChange(e) {
@@ -84,39 +101,14 @@ export class Upload extends Component {
     this.setState({ description: e.target.value })
   }
 
-  onChange(e) {
+  onFileChange(e) {
     this.setState({ file: e.target.files[0] })
-  }
-
-  fileUpload(file) {
-    const formData = new FormData();
-    formData.append("file", file)
-    const config = {
-      headers: {
-        "content-type": "multipart/form-data"
-      }
-    }
-
-    return new Promise(resolve => {
-      setTimeout(() => {
-        resolve({
-          name: this.state.name,
-          description: this.state.description,
-          path: "/templates/some-template.dotx",
-          fields: [
-            "Field1",
-            "Field2",
-            "Field3"
-          ]
-        });
-      }, 500)
-    });
-    // return post(this.props.url, formData, config)
   }
 }
 
 Upload.propTypes = {
   url: PropTypes.string.isRequired,
+  getSASUrl: PropTypes.string.isRequired,
   hidden: PropTypes.bool.isRequired,
   onUploaded: PropTypes.func.isRequired,
   onDismissed: PropTypes.func.isRequired

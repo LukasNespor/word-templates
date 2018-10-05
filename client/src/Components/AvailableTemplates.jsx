@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from "prop-types";
 import { Spinner, SpinnerSize, Icon } from "office-ui-fabric-react";
-// import axios from "axios";
+import axios from "axios";
 
 export class AvailableTemplates extends Component {
   constructor() {
@@ -33,21 +33,10 @@ export class AvailableTemplates extends Component {
   }
 
   componentDidMount() {
-    setTimeout(() => {
-      this.props.onLoaded([
-        { name: "Šablona 1", path: "/templates/template1.dotx", fields: ["FirstName", "LastName", "Today"] },
-        {
-          name: "Šablona 2", path: "/templates/template2.dotx", fields: ["Field1", "Field2", "Field3"],
-          description: "Lorem ipsum dolor sit amet"
-        },
-        { name: "Šablona 3", path: "/templates/template3.dotx", fields: ["Exekutor", "Dluznik", "Dnes"] }
-      ]);
+    axios.get(this.props.url).then(response => {
+      this.props.onLoaded(response.data);
       this.setState({ processing: false });
-    }, 500);
-
-    // axios.get(this.props.url).then(response => {
-    //   this.setState({ templates: response })
-    // });
+    });
   }
 
   onSelected(template) {
