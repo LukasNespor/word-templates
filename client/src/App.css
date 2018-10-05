@@ -1,0 +1,52 @@
+
+.container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.sidebar {
+  flex-shrink: 0;
+  margin-right: 20px;
+  height: 100%;
+  background-color: rgb(252, 252, 252);
+}
+
+.content {
+  flex-grow: 1;
+  padding: 50px;
+  width: 100%;
+}
+
+.availableTemplates > .spinner {
+  padding-top: 20px;
+}
+
+.sidebarContainer {
+  padding: 50px;
+}
+
+.templateList {
+  list-style: none;
+  margin-left: 0;
+  padding-left: 0;
+  min-width: 200px;
+}
+
+.listItem {
+  padding: 5px 10px 5px 10px;
+}
+
+.listItem:hover {
+  background-color: rgb(243, 243, 243);
+  cursor: pointer;
+}
+
+.icon {
+  padding-right: 5px;
+}
+
+.fieldContainer {
+  max-width: 400px;
+  margin-bottom: 10px;
+}
