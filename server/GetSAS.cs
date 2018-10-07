@@ -20,7 +20,7 @@ namespace LNE.GetSAS
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
 
-            var permissions = SharedAccessBlobPermissions.Create | SharedAccessBlobPermissions.Write;
+            var permissions = SharedAccessBlobPermissions.Create;
             var storageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("AzureWebJobsStorage"));
             var blobClient = storageAccount.CreateCloudBlobClient();
             var container = blobClient.GetContainerReference("templates");

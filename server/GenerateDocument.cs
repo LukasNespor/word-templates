@@ -1,21 +1,16 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Packaging;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
+using Newtonsoft.Json;
 using OpenXmlHelpers.Word;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml;
-using System.Net.Http;
-using System.Net;
-using System.Net.Http.Headers;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace LNE.GenerateDocument
 {
@@ -34,6 +29,7 @@ namespace LNE.GenerateDocument
             CloudBlockBlob sourceBlob = sourceContainer.GetBlockBlobReference(data.blobName.ToString());
             await sourceBlob.FetchAttributesAsync();
 
+            byte[] bytes = null;
             using (var stream = new MemoryStream())
             {
                 await sourceBlob.DownloadToStreamAsync(stream);
@@ -50,12 +46,12 @@ namespace LNE.GenerateDocument
                     }
 
                     doc.MainDocumentPart.Document.Save();
-                    doc.SaveAs(newBlobName).Close();
+                    doc.Close();
+
+                    bytes = new byte[stream.Length];
+                    bytes = stream.ToArray();
                 }
             }
-
-            byte[] bytes = File.ReadAllBytes(newBlobName);
-            File.Delete(newBlobName);
 
             return new FileContentResult(bytes, sourceBlob.Properties.ContentType);
         }
