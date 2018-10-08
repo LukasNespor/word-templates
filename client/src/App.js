@@ -4,6 +4,7 @@ import "./App.css";
 import { Upload } from "./Components/Upload";
 import { AvailableTemplates } from "./Components/AvailableTemplates";
 import { Form } from "./Components/Form";
+import { HelpPanel } from "./Components/HelpPanel"
 import update from "immutability-helper";
 
 import { PrimaryButton } from "office-ui-fabric-react/lib/Button";
@@ -22,15 +23,19 @@ class App extends Component {
     super();
     this.state = {
       dialogHidden: true,
+      helpPanelHidden: true,
       templates: [],
       selectedTemplate: null
     };
 
     this.showUpload = this.showUpload.bind(this);
+    this.onUploadDissmissed = this.onUploadDissmissed.bind(this);
+    this.showHelpPanel = this.showHelpPanel.bind(this);
+    this.onHelpPanelDismissed = this.onHelpPanelDismissed.bind(this);
+
     this.onTemplatesLoaded = this.onTemplatesLoaded.bind(this);
     this.onUploaded = this.onUploaded.bind(this);
     this.onSelected = this.onSelected.bind(this);
-    this.onDissmissedUpload = this.onDissmissedUpload.bind(this);
     this.onTemplateRemoved = this.onTemplateRemoved.bind(this);
   }
 
@@ -40,16 +45,27 @@ class App extends Component {
         <div className="sidebar">
           <div className="sidebarContainer">
 
-            <PrimaryButton text="Přidat šablonu" onClick={this.showUpload} />
+            {!this.state.helpPanelHidden &&
+              <HelpPanel onDismissed={this.onHelpPanelDismissed} />
+            }
+
             {!this.state.dialogHidden &&
               <Upload
                 processTemplateurl={processTemplateUrl}
                 getTokenUrl={getTokenUrl}
                 hidden={this.state.dialogHidden}
                 onUploaded={this.onUploaded}
-                onDismissed={this.onDissmissedUpload}
+                onDismissed={this.onUploadDissmissed}
               />
             }
+
+            <div className="fieldContainer">
+              <PrimaryButton text="Jak vytvořit šablonu" onClick={this.showHelpPanel} />
+            </div>
+
+            <div className="fieldContainer">
+              <PrimaryButton text="Přidat šablonu" onClick={this.showUpload} />
+            </div>
 
             <AvailableTemplates
               getTemplatesUrl={listTemplatesUrl}
@@ -72,6 +88,18 @@ class App extends Component {
 
   showUpload() {
     this.setState({ dialogHidden: false });
+  }
+
+  onUploadDissmissed() {
+    this.setState({ dialogHidden: true });
+  }
+
+  showHelpPanel() {
+    this.setState({ helpPanelHidden: false });
+  }
+
+  onHelpPanelDismissed() {
+    this.setState({ helpPanelHidden: true });
   }
 
   onTemplatesLoaded(templates) {
@@ -105,9 +133,6 @@ class App extends Component {
     this.setState({ selectedTemplate: template });
   }
 
-  onDissmissedUpload() {
-    this.setState({ dialogHidden: true });
-  }
 }
 
 export default App;

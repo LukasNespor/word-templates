@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from "prop-types";
-import { Spinner, SpinnerSize, Icon } from "office-ui-fabric-react";
+import { Spinner, SpinnerSize } from "office-ui-fabric-react/lib/Spinner";
+import { Icon } from "office-ui-fabric-react/lib/Icon";
 import axios from "axios";
 
 export class AvailableTemplates extends Component {

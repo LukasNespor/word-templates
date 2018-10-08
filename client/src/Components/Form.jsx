@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from "prop-types";
-import { TextField, PrimaryButton, Spinner, SpinnerSize, Icon, DefaultButton } from "office-ui-fabric-react";
+import { TextField } from "office-ui-fabric-react/lib/TextField";
+import { PrimaryButton, DefaultButton } from "office-ui-fabric-react/lib/Button";
+import { Spinner, SpinnerSize } from "office-ui-fabric-react/lib/Spinner";
+import { Icon } from "office-ui-fabric-react/lib/Icon";
+import { ConfirmDialog } from "./ConfirmDialog";
 import axios from "axios";
 import update from "immutability-helper";
-import { ConfirmDialog } from "./ConfirmDialog";
 
 export class Form extends Component {
   constructor() {
@@ -27,7 +30,7 @@ export class Form extends Component {
       <div>
         {this.state.confirmIsOpen &&
           <ConfirmDialog
-            question="Opravdu si přeješ smazat šablonu?"
+            question="Opravdu si přejete šablonu smazat?"
             onConfirmed={this.onRemoveConfirmed}
             onDismissed={this.onRemoveDismissed} />}
 
@@ -61,7 +64,7 @@ export class Form extends Component {
             </div>
           </form>
           :
-          <div>Vyberte šablonu v levo nebo přidejte novou.</div>
+          <div>Vyberte šablonu dokumentu v levo nebo přidejte novou.</div>
         }
       </div>
     );
@@ -84,7 +87,7 @@ export class Form extends Component {
       var fileName = this.props.template.blobName;
       fileName = fileName.substring(0, fileName.lastIndexOf("."));
       fileName = `${fileName}_vyplneno.docx`;
-            
+
       var blob = new Blob([response.data], { type: response.type || 'application/octet-stream' });
       if (typeof window.navigator.msSaveBlob !== 'undefined') {
         // IE workaround for "HTML7007: One or more blob URLs were 

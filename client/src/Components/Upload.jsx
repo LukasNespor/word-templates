@@ -1,8 +1,9 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import {
-  Dialog, DialogType, DialogFooter, TextField, PrimaryButton, DefaultButton, Spinner, SpinnerSize
-} from "office-ui-fabric-react";
+import { Dialog, DialogType, DialogFooter } from "office-ui-fabric-react/lib/Dialog";
+import { TextField } from "office-ui-fabric-react/lib/TextField";
+import { PrimaryButton, DefaultButton } from "office-ui-fabric-react/lib/Button";
+import { Spinner, SpinnerSize } from "office-ui-fabric-react/lib/Spinner";
 import axios from "axios";
 
 export class Upload extends Component {
@@ -12,7 +13,8 @@ export class Upload extends Component {
       processing: false,
       name: "",
       description: "",
-      file: null
+      file: null,
+      message: ""
     }
 
     this.onSubmit = this.onSubmit.bind(this)
@@ -20,6 +22,7 @@ export class Upload extends Component {
     this.onDescriptionChange = this.onDescriptionChange.bind(this);
     this.onFileChange = this.onFileChange.bind(this)
     this.onDismiss = this.onDismiss.bind(this);
+    this.onGetErrorMessage = this.onGetErrorMessage.bind(this);
   }
 
   render() {
@@ -29,8 +32,9 @@ export class Upload extends Component {
         dialogContentProps={{
           type: DialogType.normal,
           title: "Přidat šablonu dokumentu",
-          showCloseButton: true
+          showCloseButton: true,
         }}
+        styles={this.getStyles}
         hidden={this.props.hidden}
         modalProps={{ isBlocking: true }}
         onDismiss={this.onDismiss}
@@ -39,12 +43,16 @@ export class Upload extends Component {
           <TextField
             placeholder="Název šablony"
             value={this.state.name}
-            onChange={this.onNameChange} />
+            required={true}
+            onChange={this.onNameChange}
+            onGetErrorMessage={this.onGetErrorMessage}
+            validateOnFocusOut
+          />
         </div>
 
         <div className="fieldContainer">
           <TextField
-            placeholder="Popis" multiline={true}
+            placeholder="Krátký popis šablony" multiline={true}
             value={this.state.description}
             onChange={this.onDescriptionChange} />
         </div>
@@ -53,6 +61,8 @@ export class Upload extends Component {
           <input type="file" onChange={this.onFileChange} accept="application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
         </div>
 
+        {this.state.message && <div className="error">{this.state.message}</div>}
+
         <DialogFooter>
           <PrimaryButton disabled={!enableUpload || this.state.processing} onClick={this.onSubmit}>
             {this.state.processing && <Spinner size={SpinnerSize.small} />}
@@ -60,9 +70,22 @@ export class Upload extends Component {
           </PrimaryButton>
           <DefaultButton disabled={this.state.processing} text="Zavřít" onClick={this.props.onDismissed} />
         </DialogFooter>
-
       </Dialog>
     )
+  }
+
+  getStyles() {
+    return {
+      main: [{
+        selectors: {
+          // eslint-disable-next-line
+          ["@media (min-width: 480px)"]: {
+            maxWidth: "600px",
+            minWidth: "400px"
+          }
+        }
+      }]
+    };
   }
 
   onSubmit() {
@@ -75,7 +98,15 @@ export class Upload extends Component {
       const customBlockSize = file.size > 1024 * 1024 * 32 ? 1024 * 1024 * 4 : 1024 * 512;
       service.singleBlobPutThresholdInBytes = customBlockSize;
       service.createBlockBlobFromBrowserFile("templates", file.name, file, { blockSize: customBlockSize }, (error, result) => {
-        if (!error) {
+        if (error) {
+          if (error.code === "UnauthorizedBlobOverwrite") {
+            this.setState({ message: "Šablona s tímto názvem souboru již existuje", processing: false });
+          } else {
+            console.error(error);
+            this.setState({ message: error.code, processing: false });
+          }
+        }
+        else {
           const data = {
             name: this.state.name,
             description: this.state.description,
@@ -120,6 +151,13 @@ export class Upload extends Component {
     }
 
     this.props.onDismissed();
+  }
+
+  onGetErrorMessage(value) {
+    if (!value || value === null || value === undefined) {
+      return "Povinné pole";
+    }
+    else return "";
   }
 }
 

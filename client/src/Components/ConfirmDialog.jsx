@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { Dialog, DialogType, DialogFooter, PrimaryButton, DefaultButton } from "office-ui-fabric-react";
+import { Dialog, DialogType, DialogFooter } from "office-ui-fabric-react/lib/Dialog";
+import { PrimaryButton, DefaultButton } from "office-ui-fabric-react/lib/Button";
 
 export class ConfirmDialog extends Component {
   render() {
@@ -8,16 +9,13 @@ export class ConfirmDialog extends Component {
       <Dialog
         dialogContentProps={{
           type: DialogType.normal,
-          title: "Potvrzení",
+          title: "Potvrzení smazání",
+          subText: this.props.question
         }}
         hidden={false}
         modalProps={{ isOpen: true, isBlocking: true }}
         onDismiss={this.props.onDismissed}
       >
-
-        <div>
-          {this.props.question}
-        </div>
 
         <DialogFooter>
           <PrimaryButton text="Ano" default={true} onClick={this.props.onConfirmed} />

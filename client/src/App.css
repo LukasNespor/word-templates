@@ -9,15 +9,22 @@
   order: -1;
   flex-grow: 0;
   flex-shrink: 0;
-  /* flex-basis: 12em; */
-
   margin-right: 20px;
   background-color: rgb(247, 247, 247);
+}
+
+.sidebar button {
+  width: 100%;
+  margin-bottom: 10px;
 }
 
 .content {
   padding: 50px;
   width: 100%;
+}
+
+.availableTemplates {
+  min-width: 200px;
 }
 
 .availableTemplates > .spinner {
@@ -32,7 +39,6 @@
   list-style: none;
   margin-left: 0;
   padding-left: 0;
-  min-width: 200px;
 }
 
 .listItem {
@@ -56,4 +62,20 @@
 
 .buttons > button {
   margin-right: 10px;
+}
+
+.helpList li {
+  margin-bottom: 20px;
+}
+
+.helpList img {
+  margin-top: 10px;
+}
+
+button .ms-Spinner {
+  padding-right: 5px;
+}
+
+.error {
+  color: red;
 }
