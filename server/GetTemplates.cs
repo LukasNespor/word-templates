@@ -45,8 +45,7 @@ namespace LNE.GetTemplates
                                 case "name": name = value; break;
                                 case "description": description = value; break;
                                 case "fields": fields = value; break;
-                                default:
-                                    break;
+                                default: break;
                             }
                         }
 
@@ -62,7 +61,7 @@ namespace LNE.GetTemplates
 
                 log.LogInformation("Templates loaded");
 
-                return new OkObjectResult(data.OrderBy(x => x.Name));
+                return new OkObjectResult(data.OrderBy(x => x.Name).ToList());
             }
             catch (Exception ex)
             {
