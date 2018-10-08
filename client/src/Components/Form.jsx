@@ -14,7 +14,8 @@ export class Form extends Component {
     this.state = {
       processing: false,
       confirmIsOpen: false,
-      fields: []
+      fields: [],
+      message: ""
     };
 
     this.onFormSubmit = this.onFormSubmit.bind(this);
@@ -66,6 +67,8 @@ export class Form extends Component {
           :
           <div>Vyberte šablonu dokumentu v levo nebo přidejte novou.</div>
         }
+
+        {this.state.message && <small className="error">{this.state.message}</small>}
       </div>
     );
   }
@@ -117,10 +120,13 @@ export class Form extends Component {
         window.URL.revokeObjectURL(blobURL);
       }
 
-      this.setState({ processing: false });
+      this.setState({ message: "", processing: false });
     }).catch(error => {
       console.error(error);
-      this.setState({ processing: false });
+      this.setState({
+        message: JSON.stringify(error, null, 1),
+        processing: false
+      });
     });
   }
 

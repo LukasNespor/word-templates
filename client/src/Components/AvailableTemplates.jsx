@@ -8,7 +8,8 @@ export class AvailableTemplates extends Component {
   constructor() {
     super();
     this.state = {
-      processing: true
+      processing: true,
+      message: ""
     }
   }
 
@@ -29,6 +30,8 @@ export class AvailableTemplates extends Component {
             )}
           </ul>
         }
+
+        {this.state.message && <small className="error">{this.state.message}></small>}
       </div>
     );
   }
@@ -36,10 +39,13 @@ export class AvailableTemplates extends Component {
   componentDidMount() {
     axios.get(this.props.getTemplatesUrl).then(response => {
       this.props.onLoaded(response.data);
-      this.setState({ processing: false });
+      this.setState({ message: "", processing: false });
     }).catch(error => {
       console.error(error);
-      this.setState({ processing: false });
+      this.setState({
+        message: JSON.stringify(error, null, 1),
+        processing: false
+      });
     });
   }
 

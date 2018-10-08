@@ -132,7 +132,6 @@ class App extends Component {
   onSelected(template) {
     this.setState({ selectedTemplate: template });
   }
-
 }
 
 export default App;
