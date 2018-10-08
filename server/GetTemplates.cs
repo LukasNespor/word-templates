@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
+using server.Code;
+using server.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,50 +15,59 @@ namespace LNE.GetTemplates
     public static class GetTemplates
     {
         [FunctionName("GetTemplates")]
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]HttpRequest req, ILogger log)
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)]HttpRequest req, ILogger log)
         {
-            var data = new List<dynamic>();
-            var storageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("AzureWebJobsStorage"));
-            var blobClient = storageAccount.CreateCloudBlobClient();
-            CloudBlobContainer container = blobClient.GetContainerReference("templates");
+            log.LogInformation("Loading templates");
 
-            BlobContinuationToken token = null;
-            do
+            try
             {
-                BlobResultSegment resultSegment = await container.ListBlobsSegmentedAsync(token);
-                token = resultSegment.ContinuationToken;
+                var data = new List<TemplateModel>();
+                var container = await Helpers.GetContainerAsync(Environment.GetEnvironmentVariable(Constants.TemplatesContainerName));
 
-                foreach (IListBlobItem blob in resultSegment.Results)
+                BlobContinuationToken token = null;
+                do
                 {
-                    var blockBlob = (CloudBlockBlob)blob;
-                    await blockBlob.FetchAttributesAsync();
+                    BlobResultSegment segment = await container.ListBlobsSegmentedAsync(token);
+                    token = segment.ContinuationToken;
 
-                    string name = "", description = "", fields = "";
-                    foreach (var item in blockBlob.Metadata)
+                    foreach (IListBlobItem blob in segment.Results)
                     {
-                        string value = Uri.UnescapeDataString(item.Value);
-                        switch (item.Key)
+                        var blockBlob = (CloudBlockBlob)blob;
+                        await blockBlob.FetchAttributesAsync();
+
+                        string name = "", description = "", fields = "";
+                        foreach (var item in blockBlob.Metadata)
                         {
-                            case "name": name = value; break;
-                            case "description": description = value; break;
-                            case "fields": fields = value; break;
-                            default:
-                                break;
+                            string value = Uri.UnescapeDataString(item.Value);
+                            switch (item.Key)
+                            {
+                                case "name": name = value; break;
+                                case "description": description = value; break;
+                                case "fields": fields = value; break;
+                                default:
+                                    break;
+                            }
                         }
+
+                        data.Add(new TemplateModel()
+                        {
+                            Name = string.IsNullOrEmpty(name) ? blockBlob.Name : name,
+                            Description = description,
+                            BlobName = blockBlob.Name,
+                            Fields = fields.Split(';')
+                        });
                     }
+                } while (token != null);
 
-                    data.Add(new
-                    {
-                        name,
-                        description,
-                        container = blockBlob.Container.Name,
-                        blobName = blockBlob.Name,
-                        fields = fields.Split(';')
-                    });
-                }
-            } while (token != null);
+                log.LogInformation("Templates loaded");
 
-            return new OkObjectResult(data);
+                return new OkObjectResult(data);
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex.Message);
+                throw ex;
+            }
         }
     }
 }

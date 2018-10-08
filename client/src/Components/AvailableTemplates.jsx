@@ -33,8 +33,11 @@ export class AvailableTemplates extends Component {
   }
 
   componentDidMount() {
-    axios.get(this.props.url).then(response => {
+    axios.get(this.props.getTemplatesUrl).then(response => {
       this.props.onLoaded(response.data);
+      this.setState({ processing: false });
+    }).catch(error => {
+      console.error(error);
       this.setState({ processing: false });
     });
   }
@@ -45,7 +48,7 @@ export class AvailableTemplates extends Component {
 }
 
 AvailableTemplates.propTypes = {
-  url: PropTypes.string.isRequired,
+  getTemplatesUrl: PropTypes.string.isRequired,
   templates: PropTypes.array.isRequired,
   onLoaded: PropTypes.func.isRequired,
   onSelected: PropTypes.func.isRequired

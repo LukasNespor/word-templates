@@ -4,17 +4,18 @@ import "./App.css";
 import { Upload } from "./Components/Upload";
 import { AvailableTemplates } from "./Components/AvailableTemplates";
 import { Form } from "./Components/Form";
+import update from "immutability-helper";
 
-import { PrimaryButton } from "office-ui-fabric-react";
+import { PrimaryButton } from "office-ui-fabric-react/lib/Button";
 import { initializeIcons } from "office-ui-fabric-react/lib/Icons";
 initializeIcons();
 
 const funcAppUrl = "http://localhost:7071/api";
-const code = "";
-const getSASUrl = `${funcAppUrl}/GetSAS?${code}`;
-const processTemplateUrl = `${funcAppUrl}/ProcessTemplate?${code}`;
-const listTemplatesUrl = `${funcAppUrl}/GetTemplates?${code}`;
-const generateDocUrl = `${funcAppUrl}/GenerateDocument?${code}`;
+const getTokenUrl = `${funcAppUrl}/GetToken`;
+const listTemplatesUrl = `${funcAppUrl}/GetTemplates`;
+const generateDocUrl = `${funcAppUrl}/GenerateDocument`;
+const processTemplateUrl = `${funcAppUrl}/ProcessTemplate`;
+const removeTemplateUrl = `${funcAppUrl}/RemoveTemplate`;
 
 class App extends Component {
   constructor() {
@@ -30,6 +31,7 @@ class App extends Component {
     this.onUploaded = this.onUploaded.bind(this);
     this.onSelected = this.onSelected.bind(this);
     this.onDissmissedUpload = this.onDissmissedUpload.bind(this);
+    this.onTemplateRemoved = this.onTemplateRemoved.bind(this);
   }
 
   render() {
@@ -41,8 +43,8 @@ class App extends Component {
             <PrimaryButton text="Přidat šablonu" onClick={this.showUpload} />
             {!this.state.dialogHidden &&
               <Upload
-                url={processTemplateUrl}
-                getSASUrl={getSASUrl}
+                processTemplateurl={processTemplateUrl}
+                getTokenUrl={getTokenUrl}
                 hidden={this.state.dialogHidden}
                 onUploaded={this.onUploaded}
                 onDismissed={this.onDissmissedUpload}
@@ -50,7 +52,7 @@ class App extends Component {
             }
 
             <AvailableTemplates
-              url={listTemplatesUrl}
+              getTemplatesUrl={listTemplatesUrl}
               templates={this.state.templates}
               onLoaded={this.onTemplatesLoaded}
               onSelected={this.onSelected} />
@@ -59,8 +61,10 @@ class App extends Component {
 
         <div className="content">
           <Form
-            url={generateDocUrl}
-            template={this.state.selectedTemplate} />
+            generateDocumentUrl={generateDocUrl}
+            removeTemplateUrl={removeTemplateUrl}
+            template={this.state.selectedTemplate}
+            onRemoved={this.onTemplateRemoved} />
         </div>
       </div>
     );
@@ -72,6 +76,18 @@ class App extends Component {
 
   onTemplatesLoaded(templates) {
     this.setState({ templates: templates });
+  }
+
+  onTemplateRemoved(template) {
+    const { templates } = this.state;
+    const found = templates.find(x => x.blobName === template.blobName);
+    const index = templates.indexOf(found);
+    const updated = update(templates, { $splice: [[index, 1]] });
+
+    this.setState({
+      templates: updated,
+      selectedTemplate: null
+    });
   }
 
   onUploaded(template) {

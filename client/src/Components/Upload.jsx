@@ -19,6 +19,7 @@ export class Upload extends Component {
     this.onNameChange = this.onNameChange.bind(this);
     this.onDescriptionChange = this.onDescriptionChange.bind(this);
     this.onFileChange = this.onFileChange.bind(this)
+    this.onDismiss = this.onDismiss.bind(this);
   }
 
   render() {
@@ -27,11 +28,12 @@ export class Upload extends Component {
       <Dialog
         dialogContentProps={{
           type: DialogType.normal,
-          title: "Přidat novou šablonu dokumentu",
+          title: "Přidat šablonu dokumentu",
           showCloseButton: true
         }}
         hidden={this.props.hidden}
-        onDismiss={this.props.onDismissed}
+        modalProps={{ isBlocking: true }}
+        onDismiss={this.onDismiss}
       >
         <div className="fieldContainer">
           <TextField
@@ -56,7 +58,7 @@ export class Upload extends Component {
             {this.state.processing && <Spinner size={SpinnerSize.small} />}
             Nahrát šablonu
           </PrimaryButton>
-          <DefaultButton text="Zavřít" onClick={this.props.onDismissed} />
+          <DefaultButton disabled={this.state.processing} text="Zavřít" onClick={this.props.onDismissed} />
         </DialogFooter>
 
       </Dialog>
@@ -65,8 +67,9 @@ export class Upload extends Component {
 
   onSubmit() {
     this.setState({ processing: true });
-    axios.get(this.props.getSASUrl).then(sasResponse => {
-      const { file } = this.state;
+    const { file } = this.state;
+
+    axios.get(this.props.getTokenUrl).then(sasResponse => {
       /* global AzureStorage */
       const service = AzureStorage.Blob.createBlobServiceWithSas(sasResponse.data.host, sasResponse.data.token);
       const customBlockSize = file.size > 1024 * 1024 * 32 ? 1024 * 1024 * 4 : 1024 * 512;
@@ -79,7 +82,7 @@ export class Upload extends Component {
             blobName: result.name
           };
 
-          axios.post(this.props.url, data).then(processed => {
+          axios.post(this.props.processTemplateurl, data).then(processed => {
             this.setState({
               name: "",
               description: "",
@@ -87,9 +90,15 @@ export class Upload extends Component {
             });
 
             this.props.onUploaded(processed.data);
+          }).catch(error => {
+            console.error(error);
+            this.setState({ processing: false });
           });
         }
       });
+    }).catch(error => {
+      console.error(error);
+      this.setState({ processing: false });
     });
   }
 
@@ -104,11 +113,19 @@ export class Upload extends Component {
   onFileChange(e) {
     this.setState({ file: e.target.files[0] })
   }
+
+  onDismiss() {
+    if (this.state.processing) {
+      return;
+    }
+
+    this.props.onDismissed();
+  }
 }
 
 Upload.propTypes = {
-  url: PropTypes.string.isRequired,
-  getSASUrl: PropTypes.string.isRequired,
+  processTemplateurl: PropTypes.string.isRequired,
+  getTokenUrl: PropTypes.string.isRequired,
   hidden: PropTypes.bool.isRequired,
   onUploaded: PropTypes.func.isRequired,
   onDismissed: PropTypes.func.isRequired

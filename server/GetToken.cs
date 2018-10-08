@@ -3,38 +3,33 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
-using Newtonsoft.Json;
+using server.Code;
 using System;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace LNE.GetSAS
 {
-    public static class GetSAS
+    public static class GetToken
     {
-        [FunctionName("GetSAS")]
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]HttpRequest req, ILogger log)
+        [FunctionName("GetToken")]
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)]HttpRequest req, ILogger log)
         {
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
+            log.LogInformation("Generating token");
 
-            var permissions = SharedAccessBlobPermissions.Create;
-            var storageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("AzureWebJobsStorage"));
-            var blobClient = storageAccount.CreateCloudBlobClient();
-            var container = blobClient.GetContainerReference("templates");
+            var container = await Helpers.GetContainerAsync(Environment.GetEnvironmentVariable(Constants.TemplatesContainerName));
+            var token = GetContainerSASToken(container, SharedAccessBlobPermissions.Create);
 
-            var sasToken = GetContainerSasToken(container, permissions);
+            log.LogInformation("Token generated");
 
             return new OkObjectResult(new
             {
-                token = sasToken,
-                host = storageAccount.BlobStorageUri.PrimaryUri
+                token,
+                host = container.ServiceClient.StorageUri.PrimaryUri
             });
         }
 
-        public static string GetBlobSasToken(CloudBlobContainer container, string blobName, SharedAccessBlobPermissions permissions, string policyName = null)
+        public static string GetBlobSASToken(CloudBlobContainer container, string blobName, SharedAccessBlobPermissions permissions, string policyName = null)
         {
             string sasBlobToken;
 
@@ -59,7 +54,7 @@ namespace LNE.GetSAS
             return sasBlobToken;
         }
 
-        public static string GetContainerSasToken(CloudBlobContainer container, SharedAccessBlobPermissions permissions, string storedPolicyName = null)
+        public static string GetContainerSASToken(CloudBlobContainer container, SharedAccessBlobPermissions permissions, string storedPolicyName = null)
         {
             string sasContainerToken;
 
