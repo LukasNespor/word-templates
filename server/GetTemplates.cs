@@ -8,6 +8,7 @@ using server.Code;
 using server.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace LNE.GetTemplates
@@ -61,7 +62,7 @@ namespace LNE.GetTemplates
 
                 log.LogInformation("Templates loaded");
 
-                return new OkObjectResult(data);
+                return new OkObjectResult(data.OrderBy(x => x.Name));
             }
             catch (Exception ex)
             {
