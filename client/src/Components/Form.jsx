@@ -7,6 +7,7 @@ import { Icon } from "office-ui-fabric-react/lib/Icon";
 import { ConfirmDialog } from "./ConfirmDialog";
 import axios from "axios";
 import update from "immutability-helper";
+import { Dropdown } from 'office-ui-fabric-react';
 
 export class Form extends Component {
   constructor() {
@@ -18,8 +19,10 @@ export class Form extends Component {
       message: ""
     };
 
+    this.renderInputField = this.renderInputField.bind(this);
     this.onFormSubmit = this.onFormSubmit.bind(this);
-    this.onFieldChange = this.onFieldChange.bind(this);
+    this.onTextFieldChange = this.onTextFieldChange.bind(this);
+    this.onDropdownFieldChange = this.onDropdownFieldChange.bind(this);
     this.onRemove = this.onRemove.bind(this);
     this.onRemoveConfirmed = this.onRemoveConfirmed.bind(this);
     this.onRemoveDismissed = this.onRemoveDismissed.bind(this);
@@ -46,10 +49,8 @@ export class Form extends Component {
                 <small>{template.description}</small>}
             </div>
 
-            {template.fields.map((field, index) =>
-              <div key={index} className="fieldContainer">
-                <TextField placeholder={field} onChange={this.onFieldChange} name={field} />
-              </div>
+            {template.fields.map(field =>
+              this.renderInputField(field)
             )}
 
             <div className="buttons">
@@ -73,8 +74,36 @@ export class Form extends Component {
     );
   }
 
-  onFieldChange(e) {
+  renderInputField(field) {
+    if (field.toLowerCase().indexOf("seznam") === -1) {
+      return (
+        <div key={field} className="fieldContainer">
+          <TextField placeholder={field} onChange={this.onTextFieldChange} name={field} />
+        </div>
+      );
+    } else {
+      const splitted = field.split(" ");
+      const listName = splitted[1].toLowerCase();
+      const items = this.props.lists.filter(x => x.name === listName).map(x => ({
+        key: `${field}|${x.value}`,
+        text: x.value
+      }));
+
+      return (
+        <div key={field} className="fieldContainer">
+          <Dropdown placeHolder={field} onChange={this.onDropdownFieldChange} options={items} />
+        </div>
+      );
+    }
+  }
+
+  onTextFieldChange(e) {
     this.updateField(e.target.name, e.target.value);
+  }
+
+  onDropdownFieldChange(e, item) {
+    console.log(item);
+    this.updateField(item.key.split("|")[0], item.text);
   }
 
   onFormSubmit(e) {
@@ -169,5 +198,6 @@ Form.propTypes = {
   generateDocumentUrl: PropTypes.string.isRequired,
   removeTemplateUrl: PropTypes.string.isRequired,
   template: PropTypes.object,
+  lists: PropTypes.array,
   onRemoved: PropTypes.func.isRequired
 }

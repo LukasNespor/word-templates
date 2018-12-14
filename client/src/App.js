@@ -1,19 +1,22 @@
 import React, { Component } from 'react';
+import axios from "axios";
+import update from "immutability-helper";
 import "./App.css";
 
 import { Upload } from "./Components/Upload";
 import { AvailableTemplates } from "./Components/AvailableTemplates";
 import { Form } from "./Components/Form";
 import { HelpPanel } from "./Components/HelpPanel"
-import update from "immutability-helper";
 
 import { PrimaryButton } from "office-ui-fabric-react/lib/Button";
 import { initializeIcons } from "office-ui-fabric-react/lib/Icons";
 initializeIcons();
 
-const funcAppUrl = "http://localhost:7071/api";
+const funcAppUrl = "https://lnetemplates.azurewebsites.net/api";
+// const funcAppUrl = "http://localhost:7071/api";
 const getTokenUrl = `${funcAppUrl}/GetToken`;
 const listTemplatesUrl = `${funcAppUrl}/GetTemplates`;
+const getListsUrl = `${funcAppUrl}/GetLists`;
 const generateDocUrl = `${funcAppUrl}/GenerateDocument`;
 const processTemplateUrl = `${funcAppUrl}/ProcessTemplate`;
 const removeTemplateUrl = `${funcAppUrl}/RemoveTemplate`;
@@ -25,6 +28,7 @@ class App extends Component {
       dialogHidden: true,
       helpPanelHidden: true,
       templates: [],
+      lists: [],
       selectedTemplate: null
     };
 
@@ -80,10 +84,19 @@ class App extends Component {
             generateDocumentUrl={generateDocUrl}
             removeTemplateUrl={removeTemplateUrl}
             template={this.state.selectedTemplate}
+            lists={this.state.lists}
             onRemoved={this.onTemplateRemoved} />
         </div>
       </div>
     );
+  }
+
+  componentDidMount() {
+    axios.get(getListsUrl).then(lists => {
+      this.setState({ lists: lists.data });
+    }).catch(error => {
+      console.error(error);
+    });
   }
 
   showUpload() {
