@@ -22,7 +22,7 @@ export class Form extends Component {
     this.renderInputField = this.renderInputField.bind(this);
     this.onFormSubmit = this.onFormSubmit.bind(this);
     this.onTextFieldChange = this.onTextFieldChange.bind(this);
-    this.onDropdownFieldChange = this.onDropdownFieldChange.bind(this);
+    this.onSelectFieldChange = this.onSelectFieldChange.bind(this);
     this.onRemove = this.onRemove.bind(this);
     this.onRemoveConfirmed = this.onRemoveConfirmed.bind(this);
     this.onRemoveDismissed = this.onRemoveDismissed.bind(this);
@@ -84,14 +84,22 @@ export class Form extends Component {
     } else {
       const splitted = field.split(" ");
       const listName = splitted[1].toLowerCase();
-      const items = this.props.lists.filter(x => x.name === listName).map(x => ({
-        key: `${field}|${x.value}`,
-        text: x.value
-      }));
+      const pad = listName === "exekutor" ? 3 : 2;
+      const items = this.props.lists
+        .filter(x => x.type === listName)
+        .sort((a, b) => parseInt(a.id) - parseInt(b.id))
+        .map(x => ({
+          key: `${x.id}|${listName}|${field}`,
+          text: `${this.pad(x.id, pad)} | ${x.value}`
+        }));
 
       return (
         <div key={field} className="fieldContainer">
-          <Dropdown placeHolder={field} onChange={this.onDropdownFieldChange} options={items} />
+          <Dropdown
+            placeHolder={field}
+            options={items}
+            onChange={this.onSelectFieldChange}
+          />
         </div>
       );
     }
@@ -101,9 +109,10 @@ export class Form extends Component {
     this.updateField(e.target.name, e.target.value);
   }
 
-  onDropdownFieldChange(e, item) {
-    console.log(item);
-    this.updateField(item.key.split("|")[0], item.text);
+  onSelectFieldChange(e, item) {
+    const splitted = item.key.split("|");
+    const found = this.props.lists.find(x => x.id === splitted[0] && x.type === splitted[1]);
+    this.updateField(splitted[2], found.value);
   }
 
   onFormSubmit(e) {
@@ -191,6 +200,11 @@ export class Form extends Component {
 
   onRemoveDismissed() {
     this.setState({ confirmIsOpen: false });
+  }
+
+  pad(string, size) {
+    while (string.length < (size || 2)) { string = "0" + string; }
+    return string;
   }
 }
 

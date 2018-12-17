@@ -17,8 +17,9 @@ namespace server
             var items = await Helpers.GetListsAsync();
             return new OkObjectResult(items.Select(x => new
             {
-                name = x.PartitionKey,
-                value = x.RowKey
+                type = x.PartitionKey,
+                id = x.RowKey,
+                value = x.Value
             }));
         }
     }

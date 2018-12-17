@@ -35,19 +35,19 @@ namespace server.Code
             return container;
         }
 
-        public static async Task<IList<DynamicTableEntity>> GetListsAsync()
+        public static async Task<IList<ListRecord>> GetListsAsync()
         {
             var storageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable(Constants.AzureWebJobsStorage));
             var client = storageAccount.CreateCloudTableClient();
             var table = client.GetTableReference(Environment.GetEnvironmentVariable(Constants.ListsTableName));
             await table.CreateIfNotExistsAsync();
 
-            var items = new List<DynamicTableEntity>();
+            var items = new List<ListRecord>();
             TableContinuationToken continuationToken = null;
 
             do
             {
-                var result = await table.ExecuteQuerySegmentedAsync(new TableQuery(), continuationToken);
+                var result = await table.ExecuteQuerySegmentedAsync(new TableQuery<ListRecord>(), continuationToken);
                 continuationToken = result.ContinuationToken;
 
                 if (result.Results.Count > 0)
