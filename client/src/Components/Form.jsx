@@ -16,12 +16,14 @@ export class Form extends Component {
       processing: false,
       confirmIsOpen: false,
       fields: [],
+      fileName: "vyplneno",
       message: ""
     };
 
     this.renderInputField = this.renderInputField.bind(this);
     this.onFormSubmit = this.onFormSubmit.bind(this);
     this.onTextFieldChange = this.onTextFieldChange.bind(this);
+    this.onFileNameChange = this.onFileNameChange.bind(this);
     this.onSelectFieldChange = this.onSelectFieldChange.bind(this);
     this.onRemove = this.onRemove.bind(this);
     this.onRemoveConfirmed = this.onRemoveConfirmed.bind(this);
@@ -49,6 +51,11 @@ export class Form extends Component {
                 <small>{template.description}</small>}
             </div>
 
+            <div className="fieldContainer">
+              <TextField placeholder="Název vygenerovaného souboru" 
+              onChange={this.onFileNameChange} name="fileName" />
+            </div>
+
             {template.fields.map(field =>
               this.renderInputField(field)
             )}
@@ -66,7 +73,7 @@ export class Form extends Component {
             </div>
           </form>
           :
-          <div>Vyberte šablonu dokumentu v levo nebo přidejte novou.</div>
+          <div>Vyberte šablonu dokumentu vlevo nebo přidejte novou.</div>
         }
 
         {this.state.message && <small className="error">{this.state.message}</small>}
@@ -109,6 +116,10 @@ export class Form extends Component {
     this.updateField(e.target.name, e.target.value);
   }
 
+  onFileNameChange(e) {
+    this.setState({ fileName: e.target.value })
+  }
+
   onSelectFieldChange(e, item) {
     const splitted = item.key.split("|");
     const found = this.props.lists.find(x => x.id === splitted[0] && x.type === splitted[1]);
@@ -125,9 +136,7 @@ export class Form extends Component {
 
     // https://github.com/kennethjiang/js-file-download/blob/master/file-download.js
     axios.post(this.props.generateDocumentUrl, data, { responseType: "blob" }).then(response => {
-      var fileName = this.props.template.blobName;
-      fileName = fileName.substring(0, fileName.lastIndexOf("."));
-      fileName = `${fileName}_vyplneno.docx`;
+      var fileName = `${this.state.fileName}.docx`;
 
       var blob = new Blob([response.data], { type: response.type || 'application/octet-stream' });
       if (typeof window.navigator.msSaveBlob !== 'undefined') {
