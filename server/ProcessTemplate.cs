@@ -43,7 +43,7 @@ namespace LNE.UploadTemplate
                         foreach (var field in doc.GetMergeFields())
                         {
                             string fieldName = OpenXmlWordHelpers.GetFieldNameFromMergeField(field.InnerText).Trim('\"');
-                            if (!fields.Contains(fieldName))
+                            if (!fields.Contains(fieldName) && fieldName.Trim() != "PAGE")
                                 fields.Add(fieldName);
                         }
                     }
