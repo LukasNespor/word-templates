@@ -54,7 +54,7 @@ namespace LNE.GetTemplates
                             Name = string.IsNullOrEmpty(name) ? blockBlob.Name : name,
                             Description = description,
                             BlobName = blockBlob.Name,
-                            Fields = fields.Split(';')
+                            Fields = Helpers.GetFieldsWithoutHiddenArray(fields)
                         });
                     }
                 } while (token != null);

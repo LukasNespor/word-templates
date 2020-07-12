@@ -6,6 +6,7 @@ using server.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -56,6 +57,14 @@ namespace server.Code
             } while (continuationToken != null);
 
             return items;
+        }
+
+        public static string[] GetFieldsWithoutHiddenArray(string separatedFields)
+        {
+            var fields = separatedFields.Split(';').ToList();
+            var today = fields.Where(x => x.Equals("dnes", StringComparison.OrdinalIgnoreCase));
+            today.ToList().ForEach(x => fields.Remove(x));
+            return fields.ToArray();
         }
     }
 }

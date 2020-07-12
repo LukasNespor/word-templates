@@ -17,7 +17,7 @@ namespace LNE.UploadTemplate
     public static class ProcessTemplate
     {
         [FunctionName("ProcessTemplate")]
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)]HttpRequest req, ILogger log)
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req, ILogger log)
         {
             log.LogInformation("Procesing template");
 
@@ -54,8 +54,9 @@ namespace LNE.UploadTemplate
                 if (!string.IsNullOrEmpty(data.Description))
                     blob.Metadata.Add("description", Uri.EscapeDataString(data.Description));
 
+                string fieldsString = string.Join(";", fields);
                 if (fields.Count > 0)
-                    blob.Metadata.Add("fields", Uri.EscapeDataString(string.Join(";", fields)));
+                    blob.Metadata.Add("fields", Uri.EscapeDataString(fieldsString));
                 else log.LogWarning("No fields were found");
 
                 await blob.SetMetadataAsync();
@@ -67,7 +68,7 @@ namespace LNE.UploadTemplate
                     Name = data.Name,
                     BlobName = data.BlobName,
                     Description = data.Description,
-                    Fields = fields.ToArray(),
+                    Fields = Helpers.GetFieldsWithoutHiddenArray(fieldsString)
                 });
             }
             catch (Exception ex)

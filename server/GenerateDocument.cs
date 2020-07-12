@@ -8,7 +8,10 @@ using OpenXmlHelpers.Word;
 using server.Code;
 using server.Models;
 using System;
+using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace LNE.GenerateDocument
@@ -16,7 +19,7 @@ namespace LNE.GenerateDocument
     public static class GenerateDocument
     {
         [FunctionName("GenerateDocument")]
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)]HttpRequest req, ILogger log)
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req, ILogger log)
         {
             log.LogInformation("Generating document");
 
@@ -38,8 +41,6 @@ namespace LNE.GenerateDocument
 
                     using (WordprocessingDocument doc = WordprocessingDocument.Open(stream, true))
                     {
-                        var fields = doc.GetMergeFields();
-
                         foreach (var field in data.Fields)
                         {
                             if (!string.IsNullOrEmpty(field.Value))
@@ -51,6 +52,10 @@ namespace LNE.GenerateDocument
                                 doc.GetMergeFields(name).ReplaceWithText(field.Value);
                             }
                         }
+
+                        var todayField = doc.GetMergeFields("dnes");
+                        if (todayField.Count() > 0)
+                            todayField.ReplaceWithText(DateTime.Now.ToString("d. MMMM yyyy", new CultureInfo("cs")));
 
                         doc.MainDocumentPart.Document.Save();
                         doc.Close();
