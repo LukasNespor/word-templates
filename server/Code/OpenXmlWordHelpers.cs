@@ -67,7 +67,7 @@ namespace OpenXmlHelpers.Word
                 return null;
 
             return mergeFields
-                .Where(f => f.InnerText.StartsWith(GetMergeFieldStartString(mergeFieldName)));
+                .Where(f => f.InnerText.StartsWith(GetMergeFieldStartString(mergeFieldName), System.StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
