@@ -52,8 +52,8 @@ export class Form extends Component {
             </div>
 
             <div className="fieldContainer">
-              <TextField placeholder="Název vygenerovaného souboru" 
-              onChange={this.onFileNameChange} name="fileName" />
+              <TextField placeholder="Název vygenerovaného souboru"
+                onChange={this.onFileNameChange} name="fileName" />
             </div>
 
             {template.fields.map(field =>
@@ -104,7 +104,7 @@ export class Form extends Component {
         <div key={field} className="fieldContainer">
           <Dropdown
             placeHolder={field}
-            options={items}
+            options={[{ key: `-1|${listName}|${field}`, text: "" }, ...items]}
             onChange={this.onSelectFieldChange}
           />
         </div>

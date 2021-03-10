@@ -12,7 +12,7 @@ import { PrimaryButton } from "office-ui-fabric-react/lib/Button";
 import { initializeIcons } from "office-ui-fabric-react/lib/Icons";
 initializeIcons();
 
-const funcAppUrl = "https://lnetemplates.azurewebsites.net/api";
+const funcAppUrl = "https://lne-templates.azurewebsites.net/api";
 // const funcAppUrl = "http://localhost:7071/api";
 const getTokenUrl = `${funcAppUrl}/GetToken`;
 const listTemplatesUrl = `${funcAppUrl}/GetTemplates`;
