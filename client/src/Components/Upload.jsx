@@ -143,6 +143,9 @@ export class Upload extends Component {
 
   onFileChange(e) {
     this.setState({ file: e.target.files[0] })
+    if (!this.state.name && e.target.files.length > 0) {
+      this.setState({ name: e.target.files[0].name.replace(".docx", "") })
+    }
   }
 
   onDismiss() {
