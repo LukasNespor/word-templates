@@ -31,7 +31,7 @@ export class AvailableTemplates extends Component {
           </ul>
         }
 
-        {this.state.message && <small className="error">{this.state.message}></small>}
+        {this.state.message && <small className="error">{this.state.message}</small>}
       </div>
     );
   }

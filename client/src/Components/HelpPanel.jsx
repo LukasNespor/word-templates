@@ -15,11 +15,11 @@ export class HelpPanel extends Component {
         onDismiss={this.props.onDismissed}>
         <ol className="helpList">
           <li>
-            Na záložce <strong>Vložit</strong> najděte <strong>Rychlé části</strong> a pod tím <strong>Pole</strong>. (Insert > Quick Parts > Field)
+            Na záložce <strong>Vložení</strong> najděte <strong>Rychlé části</strong> a pod tím <strong>Pole</strong>. (Insert &gt; Quick Parts &gt; Field)
             <img src="/images/01-field-add.png" alt="Insert field" width="100%" />
           </li>
           <li>
-            Otevře se dialogovné okno, kde je potřeba najít <strong>MergeField</strong> a do pole <strong>Název pole</strong> napsat libovolné pojmenování pole. (MergeField > Field name)
+            Otevře se dialogovné okno, kde je potřeba najít <strong>MergeField</strong> a do pole <strong>Název pole</strong> napsat libovolné pojmenování pole. (MergeField &gt; Field name)
             <img src="/images/02-field-dialog.png" alt="Inser field dialog" width="100%" />
           </li>
           <li>
