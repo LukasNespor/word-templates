@@ -44,11 +44,17 @@ namespace server.Code.Services
             await table.ExecuteAsync(operation);
         }
 
-        public static async Task DeleteRecordAsync(string tableName, string partitionKey, string rowKey)
+        public static async Task<T> GetRecordAsync<T>(string tableName, string partitionKey, string rowKey) where T : class, ITableEntity
         {
             var table = GetTable(tableName);
-            var record = await table.ExecuteAsync(TableOperation.Retrieve(partitionKey, rowKey));
-            await table.ExecuteAsync(TableOperation.Delete((DynamicTableEntity)record.Result));
+            var response = await table.ExecuteAsync(TableOperation.Retrieve<T>(partitionKey, rowKey));
+            return response.Result as T;
+        }
+
+        public static async Task DeleteRecordAsync(string tableName, ITableEntity record)
+        {
+            var table = GetTable(tableName);
+            await table.ExecuteAsync(TableOperation.Delete(record));
         }
 
         public static CloudTable GetTable(string tableName)

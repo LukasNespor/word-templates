@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -13,13 +14,14 @@ namespace server
     public static class RemoveTemplate
     {
         [FunctionName(nameof(RemoveTemplate))]
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "templates")] TemplateModel data, ILogger log)
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "templates/{id}")] HttpRequest req, string id, ILogger log)
         {
             try
             {
-                await TableService.DeleteRecordAsync(Constants.TemplatesTableName, Constants.TemplatesPartitionKey, data.Id);
+                var record = await TableService.GetRecordAsync<TemplateEntity>(Constants.TemplatesTableName, Constants.TemplatesPartitionKey, id);
+                await TableService.DeleteRecordAsync(Constants.TemplatesTableName, record);
                 var container = BlobService.GetContainer(Constants.TemplatesContainerName);
-                var blob = container.GetBlockBlobReference(data.BlobName);
+                var blob = container.GetBlockBlobReference(record.BlobName);
                 await blob.DeleteIfExistsAsync();
                 return new NoContentResult();
             }
