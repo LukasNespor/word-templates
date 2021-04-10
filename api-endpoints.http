@@ -1,0 +1,43 @@
+POST http://localhost:7071/api/init
+###
+
+GET http://localhost:7071/api/token
+###
+
+GET http://localhost:7071/api/lists
+###
+
+POST http://localhost:7071/api/templates
+Content-Type: application/json
+
+{
+    "name": "Šablona 1",
+    "description": "Krátký popis",
+    "group": "Skupina 1",
+    "blobName": "Sablona1.docx"
+}
+###
+
+GET http://localhost:7071/api/templates
+###
+
+POST http://localhost:7071/api/generate
+Content-Type: application/json
+
+{
+    "blobName": "Sablona1.docx",
+    "fields": [
+        {
+            "name":"Field1",
+            "value":"CJ123456789"
+        },
+        {
+            "name":"Field1",
+            "value":"František Vomáčka"
+        }
+    ]
+}
+###
+
+DELETE http://localhost:7071/api/templates/{id-here}
+###
