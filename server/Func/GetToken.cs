@@ -2,30 +2,24 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Blob;
 using server.Code;
+using server.Code.Services;
 using System;
-using System.Threading.Tasks;
 
 namespace LNE.GetSAS
 {
     public static class GetToken
     {
-        [FunctionName("GetToken")]
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)]HttpRequest req, ILogger log)
+        [FunctionName(nameof(GetToken))]
+        public static IActionResult Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "token")]HttpRequest req)
         {
-            log.LogInformation("Generating token");
-
-            var container = await Helpers.GetContainerAsync(Environment.GetEnvironmentVariable(Constants.TemplatesContainerName));
+            var container = BlobService.GetContainer(Constants.TemplatesContainerName);
             var token = GetContainerSASToken(container, SharedAccessBlobPermissions.Create);
-
-            log.LogInformation("Token generated");
-
             return new OkObjectResult(new
             {
-                token,
-                host = container.ServiceClient.StorageUri.PrimaryUri
+                Token = token,
+                Host = container.ServiceClient.StorageUri.PrimaryUri
             });
         }
 

@@ -1,36 +1,28 @@
 ﻿using DocumentFormat.OpenXml.Packaging;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using OpenXmlHelpers.Word;
 using server.Code;
+using server.Code.Services;
 using server.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace LNE.UploadTemplate
 {
-    public static class ProcessTemplate
+    public static class CreateTemplate
     {
-        [FunctionName("ProcessTemplate")]
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req, ILogger log)
+        [FunctionName(nameof(CreateTemplate))]
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "templates")] TemplateModel data, ILogger log)
         {
-            log.LogInformation("Procesing template");
-
             try
             {
-                var data = await Helpers.GetModelFromBodyAsync<TemplateModel>(req.Body);
-                if (data == null)
-                {
-                    log.LogWarning("Posted data are not correct");
-                    return new BadRequestObjectResult("Posted data are not correct");
-                }
-
-                var container = await Helpers.GetContainerAsync(Environment.GetEnvironmentVariable(Constants.TemplatesContainerName));
+                var container = BlobService.GetContainer(Constants.TemplatesContainerName);
                 var blob = container.GetBlockBlobReference(data.BlobName);
 
                 var fields = new List<string>();
@@ -43,38 +35,40 @@ namespace LNE.UploadTemplate
                         foreach (var field in doc.GetMergeFields())
                         {
                             string fieldName = OpenXmlWordHelpers.GetFieldNameFromMergeField(field.InnerText).Trim('\"');
-                            if (!fields.Contains(fieldName) && fieldName.Trim() != "PAGE")
+                            if (!fields.Contains(fieldName) && fieldName.Trim() != "PAGE" && !fieldName.Equals("dnes", StringComparison.OrdinalIgnoreCase))
                                 fields.Add(fieldName);
                         }
                     }
                 }
 
-                blob.Metadata.Add("name", Uri.EscapeDataString(data.Name));
-
-                if (!string.IsNullOrEmpty(data.Description))
-                    blob.Metadata.Add("description", Uri.EscapeDataString(data.Description));
-
                 string fieldsString = string.Join(";", fields);
-                if (fields.Count > 0)
-                    blob.Metadata.Add("fields", Uri.EscapeDataString(fieldsString));
-                else log.LogWarning("No fields were found");
-
-                await blob.SetMetadataAsync();
+                string id = Guid.NewGuid().ToString("N");
+                var template = new TemplateEntity(Constants.TemplatesPartitionKey, id)
+                {
+                    Name = data.Name,
+                    BlobName = data.BlobName,
+                    Group = data.Group,
+                    Description = data.Description,
+                    Fields = fieldsString
+                };
+                await TableService.CreateRecordAsync(Constants.TemplatesTableName, template);
 
                 log.LogInformation("Template processed");
 
                 return new OkObjectResult(new TemplateModel()
                 {
+                    Id = id,
                     Name = data.Name,
                     BlobName = data.BlobName,
+                    Group = data.Group,
                     Description = data.Description,
-                    Fields = Helpers.GetFieldsWithoutHiddenArray(fieldsString)
+                    Fields = fields
                 });
             }
             catch (Exception ex)
             {
-                log.LogError(ex.Message);
-                throw ex;
+                log.LogError(ex.ToString());
+                throw;
             }
         }
     }

@@ -2,13 +2,13 @@
 
 namespace server.Models
 {
-    public class ListRecord : TableEntity
+    public class ListEntity : TableEntity
     {
-        public ListRecord()
+        public ListEntity()
         {
         }
 
-        public ListRecord(string partitionKey, string rowKey) : base(partitionKey, rowKey)
+        public ListEntity(string partitionKey, string rowKey) : base(partitionKey, rowKey)
         {
         }
 

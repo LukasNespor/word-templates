@@ -1,19 +1,14 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Collections.Generic;
 
 namespace server.Models
 {
-    internal class TemplateModel
+    public class TemplateModel
     {
-        [DataMember(Name = "name")]
+        public string Id { get; set; }
         public string Name { get; set; }
-
-        [DataMember(Name = "description")]
         public string Description { get; set; }
-
-        [DataMember(Name = "blobName")]
         public string BlobName { get; set; }
-
-        [DataMember(Name = "fields")]
-        public string[] Fields { get; set; }
+        public string Group { get; set; }
+        public IEnumerable<string> Fields { get; set; }
     }
 }

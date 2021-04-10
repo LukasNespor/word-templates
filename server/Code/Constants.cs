@@ -1,9 +1,11 @@
 ﻿namespace server.Code
 {
-    internal class Constants
+    internal static class Constants
     {
         public const string AzureWebJobsStorage = nameof(AzureWebJobsStorage);
-        public const string TemplatesContainerName = nameof(TemplatesContainerName);
-        public const string ListsTableName = nameof(ListsTableName);
+        public const string TemplatesContainerName = "templates";
+        public const string TemplatesTableName = "templates";
+        public const string ListsTableName = "seznamy";
+        public const string TemplatesPartitionKey = "template";
     }
 }

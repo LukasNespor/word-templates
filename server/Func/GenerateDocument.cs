@@ -6,30 +6,24 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using OpenXmlHelpers.Word;
 using server.Code;
+using server.Code.Services;
 using server.Models;
 using System;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace LNE.GenerateDocument
 {
     public static class GenerateDocument
     {
-        [FunctionName("GenerateDocument")]
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req, ILogger log)
+        [FunctionName(nameof(GenerateDocument))]
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "generate")] GenerateDocumentModel data, ILogger log)
         {
-            log.LogInformation("Generating document");
-
             try
             {
-                var data = await Helpers.GetModelFromBodyAsync<GenerateDocumentModel>(req.Body);
-                if (data == null)
-                    return new BadRequestObjectResult("Posted data are not correct");
-
-                var container = await Helpers.GetContainerAsync(Environment.GetEnvironmentVariable(Constants.TemplatesContainerName));
+                var container = BlobService.GetContainer(Constants.TemplatesContainerName);
                 var blob = container.GetBlockBlobReference(data.BlobName);
 
                 byte[] bytes = null;
@@ -37,7 +31,6 @@ namespace LNE.GenerateDocument
                 {
                     await blob.DownloadToStreamAsync(stream);
                     await blob.FetchAttributesAsync();
-                    log.LogInformation("Blob downloaded");
 
                     using (WordprocessingDocument doc = WordprocessingDocument.Open(stream, true))
                     {
@@ -54,8 +47,8 @@ namespace LNE.GenerateDocument
                         }
 
                         var todayField = doc.GetMergeFields("dnes");
-                        if (todayField.Count() > 0)
-                            todayField.ReplaceWithText(DateTime.Now.ToString("d. MMMM yyyy", new CultureInfo("cs")));
+                        if (todayField.Any())
+                            todayField.ReplaceWithText(DateTime.UtcNow.ToString("d. MMMM yyyy", new CultureInfo("cs")));
 
                         doc.MainDocumentPart.Document.Save();
                         doc.Close();
@@ -65,13 +58,12 @@ namespace LNE.GenerateDocument
                     }
                 }
 
-                log.LogInformation($"Document generated with length {bytes.Length}");
                 return new FileContentResult(bytes, blob.Properties.ContentType);
             }
             catch (Exception ex)
             {
-                log.LogError(ex.Message);
-                throw ex;
+                log.LogError(ex.ToString());
+                throw;
             }
         }
     }
