@@ -1,0 +1,13 @@
+{
+    "extends": "tslint:recommended",
+    "rules": {
+        "comment-format": false,
+        "ordered-imports": false,
+        "trailing-comma": false,
+        "object-literal-sort-keys": false,
+        "no-console": false,
+        "max-line-length": false,
+        "member-ordering": false,
+        "max-classes-per-file": false
+    }
+}

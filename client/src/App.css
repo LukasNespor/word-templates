@@ -1,68 +1,32 @@
-
 .container {
   display: flex;
-  min-height: 100vh;
+  height: calc(100% - 45px);
   width: 100%;
 }
 
 .sidebar {
-  order: -1;
+  order: 0;
   flex-grow: 0;
   flex-shrink: 0;
-  max-width: 400px;
-  margin-right: 20px;
+  width: 300px;
+  margin: 0 20px 0 0;
+  padding-top: 15px;
   background-color: rgb(247, 247, 247);
-}
-
-.sidebar button {
-  width: 100%;
-  margin-bottom: 10px;
+  overflow-x: hidden;
 }
 
 .content {
-  padding: 25px;
-  width: 100%;
-}
-
-.availableTemplates {
-  min-width: 200px;
+  order: 1;
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-grow: 1;
+  padding: 25px 0 25px 15px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .availableTemplates > .spinner {
   padding-top: 20px;
-}
-
-.sidebarContainer {
-  padding: 25px;
-}
-
-.templateList {
-  list-style: none;
-  margin-left: 0;
-  padding-left: 0;
-}
-
-.listItem {
-  padding: 5px 10px 5px 10px;
-}
-
-.listItem:hover {
-  background-color: rgb(230, 230, 230);
-  cursor: pointer;
-}
-
-.icon {
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-.fieldContainer {
-  max-width: 400px;
-  margin-bottom: 10px;
-}
-
-.buttons > button {
-  margin-right: 10px;
 }
 
 .helpList li {
