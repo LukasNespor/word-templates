@@ -1,15 +1,15 @@
 import { FunctionComponent, useCallback, useEffect, useState } from "react";
-import { PrimaryButton, initializeIcons } from "@fluentui/react";
+import { initializeIcons } from "@fluentui/react";
 import update from "immutability-helper";
 import Upload from "./components/upload";
 import Templates from "./components/templates";
 import Form from "./components/form";
 import HelpPanel from "./components/helpPanel";
+import Navigation from "./components/navigation";
 import ITemplate from "./interfaces/ITemplate";
 import IListItem from "./interfaces/IListItem";
 import { getLists } from "./services/dataServics";
 import "./App.css";
-import Navigation from "./components/navigation";
 
 const App: FunctionComponent = () => {
   const [dialogHidden, setDialogHidden] = useState(true);

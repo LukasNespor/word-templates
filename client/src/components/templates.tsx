@@ -1,4 +1,4 @@
-import { FunctionComponent, useEffect, useState } from "react";
+import { FunctionComponent, useCallback, useEffect, useState } from "react";
 import {
   Spinner, SpinnerSize,
   Nav, INavLinkGroup
@@ -33,17 +33,13 @@ const Templates: FunctionComponent<ITemplatesProps> = ({ items, templatesLoaded,
     loadData();
   }, [templatesLoaded]);
 
-  useEffect(() => {
-    setNavLinks(groupTemplates(items));
-  }, [items]);
-
-  const onSelected = (e: any, template: ITemplate) => {
+  const onSelected = useCallback((e: any, template: ITemplate) => {
     e.preventDefault();
     templateSelected(template);
-  };
+  }, [templateSelected]);
 
-  const groupTemplates = (templates: ITemplate[]): INavLinkGroup[] => {
-    const groups = _.groupBy(templates, (item: ITemplate) => {
+  useEffect(() => {
+    const groups = _.groupBy(items, (item: ITemplate) => {
       if (!item.group) {
         return "___";
       }
@@ -72,8 +68,8 @@ const Templates: FunctionComponent<ITemplatesProps> = ({ items, templatesLoaded,
       links.push(mainLink);
     });
 
-    return links;
-  };
+    setNavLinks(links);
+  }, [items, onSelected]);
 
   return (
     <div className="availableTemplates">
