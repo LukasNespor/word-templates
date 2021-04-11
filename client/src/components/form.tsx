@@ -94,7 +94,7 @@ const Form: FunctionComponent<IFormProps> = ({ template, lists, onRemoved }) => 
 
     try {
       const blob: Blob = await generateDocument(fields, template.blobName);
-      const name = `${fileName && fileName.length === 1 ? fileName : "vyplneno"}.docx`;
+      const name = `${fileName && fileName.length > 0 ? fileName : "vyplneno"}.docx`;
 
       const blobURL = window.URL.createObjectURL(blob);
       const tempLink = document.createElement("a");
