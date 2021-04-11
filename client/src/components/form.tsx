@@ -27,7 +27,7 @@ const Form: FunctionComponent<IFormProps> = ({ template, lists, onRemoved }) => 
   const [processing, setProcessing] = useState(false);
   const [confirmIsOpen, setConfirmIsOpen] = useState(false);
   const [fields, setFields] = useState<IField[]>([]);
-  const [fileName, setFileName] = useState<string>();
+  const [fileName, setFileName] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState("");
 
   const renderInputField = (field: string) => {
@@ -94,7 +94,7 @@ const Form: FunctionComponent<IFormProps> = ({ template, lists, onRemoved }) => 
 
     try {
       const blob: Blob = await generateDocument(fields, template.blobName);
-      const name = `${fileName && fileName.length > 0 ? fileName : "vyplneno"}.docx`;
+      const name = `${fileName.length > 0 ? fileName : "vyplneno"}.docx`;
 
       const blobURL = window.URL.createObjectURL(blob);
       const tempLink = document.createElement("a");
